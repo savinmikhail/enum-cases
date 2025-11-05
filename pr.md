@@ -1,5 +1,3 @@
-# RFC: Add `BackedEnum::values()`
-
 ## Summary
 
 Introduce a native `BackedEnum::values()` static method that returns the list of all backing values (int|string) of a backed enum’s cases in declaration order. This eliminates boilerplate commonly implemented across projects and aligns with the existing `cases()` API.
@@ -25,17 +23,21 @@ enum Status: string {
 This pattern appears widely across GitHub and frameworks, often implemented directly or via traits (which hides usage from code search). A conservative summary of real-world evidence:
 
 Quantitative (code search snapshots):
-- [Exact](https://github.com/search?q=%22array_map(fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code): `array_map(fn($case) => $case->value, self::cases())` → ~330 results
-- Pattern: return array_map + self::cases() + ->value → ~1,900 results
-    - https://github.com/search?q=%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code
-- Pattern: return array_map + fn($case) => $case->value → ~324 results
-    - https://github.com/search?q=%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code
-- Method name: function values() + return array_map + self::cases() → ~784 results
-    - https://github.com/search?q=%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code
+
+| Pattern | GitHub search | Results |
+| --- | --- | ---: |
+| `array_map(fn($case) => $case->value, self::cases())` | https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code | ~330 |
+| `return array_map` + `self::cases()` + `->value` | https://github.com/search?q=language%3APHP+%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code | ~1,900 |
+| `return array_map` + `fn($case) => $case->value` | https://github.com/search?q=language%3APHP+%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code | ~324 |
+| `function values()` + `return array_map` + `self::cases()` | https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code | ~784 |
+| `function toArray()` + `array_map` + `self::cases()` + `->value` | https://github.com/search?q=language%3APHP+%22function+toArray%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code | ~236 |
+| `function getValues()` + `array_map` + `self::cases()` | https://github.com/search?q=language%3APHP+%22function+getValues%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22&type=code | ~196 |
+| `function values()` + `foreach` + `self::cases()` + `[] = $` + `->value` | https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22foreach%22+%22self%3A%3Acases%28%29%22+%22%5B%5D+%3D+%24%22+%22-%3Evalue%22&type=code | ~90 |
+| Total | — | ~3,860 |
 
 Trait pattern multiplier:
 - Many projects factor this into a trait (e.g., `EnumValuesTrait`) and then `use` it in dozens of enums, so direct search counts significantly understate usage.
-- The PHP manual itself demonstrates this trait approach; ecosystems like Laravel frequently adopt it.
+- PHP manual example (trait approach): https://www.php.net/manual/en/language.enumerations.examples.php#128866
 
 Frameworks and packages:
 - symfony/symfony (TypeIdentifier enum) example: https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43
