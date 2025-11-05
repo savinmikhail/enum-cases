@@ -1,5 +1,4 @@
 https://claude.ai/public/artifacts/e4c46367-9c3b-437a-bf06-07fbb69a34f1
-используя этот диалог, давай составим подробный .md файл
 
 https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code - 330
 
