@@ -22,29 +22,29 @@ enum Status: string {
 
 This pattern appears widely across GitHub and frameworks, often implemented directly or via traits (which hides usage from code search). A conservative summary of real-world evidence:
 
-Quantitative (code search snapshots):
+1. Quantitative (code search snapshots):
 
-| Pattern | GitHub search | Results |
-| --- | --- | ---: |
-| `array_map(fn($case) => $case->value, self::cases())` | [click](https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code) | ~330 |
-| `return array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~1,900 |
-| `return array_map` + `fn($case) => $case->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code) | ~324 |
-| `function values()` + `return array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~784 |
-| `function toArray()` + `array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+toArray%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~236 |
-| `function getValues()` + `array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+getValues%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~196 |
-| `function values()` + `foreach` + `self::cases()` + `[] = $` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22foreach%22+%22self%3A%3Acases%28%29%22+%22%5B%5D+%3D+%24%22+%22-%3Evalue%22&type=code) | ~90 |
-| Total | — | ~3,860 |
+   | Pattern | GitHub search | Results |
+       | --- | --- | ---: |
+   | `array_map(fn($case) => $case->value, self::cases())` | [click](https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code) | ~330 |
+   | `return array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~1,900 |
+   | `return array_map` + `fn($case) => $case->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code) | ~324 |
+   | `function values()` + `return array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~784 |
+   | `function toArray()` + `array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+toArray%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~236 |
+   | `function getValues()` + `array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+getValues%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~196 |
+   | `function values()` + `foreach` + `self::cases()` + `[] = $` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22foreach%22+%22self%3A%3Acases%28%29%22+%22%5B%5D+%3D+%24%22+%22-%3Evalue%22&type=code) | ~90 |
+   | Total | — | ~3,860 |
 
-Trait pattern multiplier:
-- Many projects factor this into a trait (e.g., `EnumValuesTrait`) and then `use` it in dozens of enums, so direct search counts significantly understate usage.
-- PHP manual example (trait approach): https://www.php.net/manual/en/language.enumerations.examples.php#128866
+   Trait pattern multiplier:
+    - Many projects factor this into a trait (e.g., `EnumValuesTrait`) and then `use` it in dozens of enums, so direct search counts significantly understate usage.
+        - PHP manual example (trait approach): https://www.php.net/manual/en/language.enumerations.examples.php#128866
 
-Frameworks and packages:
-- symfony/symfony (TypeIdentifier enum) example: https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43
-- box-project/box usage: https://github.com/box-project/box/blob/b3c3ccecf04c27084919bae44356182645372e25/src/Phar/DiffMode.php#L31
+2. Qualitative
 
-Legacy migration pressure:
-- Legacy library with values(): https://github.com/myclabs/php-enum/blob/191882a09b5abb316a1166255b1c6392e2f91e14/src/Enum.php#L173
+   **Frameworks and packages**:
+    - symfony/symfony (TypeIdentifier enum) example: https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43
+    - box-project/box usage: https://github.com/box-project/box/blob/b3c3ccecf04c27084919bae44356182645372e25/src/Phar/DiffMode.php#L31
+    - Legacy library with values(): https://github.com/myclabs/php-enum/blob/191882a09b5abb316a1166255b1c6392e2f91e14/src/Enum.php#L173
 
 Providing a native `values()` method:
 - Removes boilerplate and fragmentation (different traits/implementations).
