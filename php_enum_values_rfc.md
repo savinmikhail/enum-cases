@@ -545,7 +545,7 @@ PHP_METHOD(BackedEnum, values)
 
 ## Proposed PHP Version
 
-**PHP 8.5** (next minor version)
+**PHP 8.6** (next minor version)
 
 This is a new feature addition, not a language change, suitable for minor version.
 
