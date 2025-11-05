@@ -26,13 +26,13 @@ Quantitative (code search snapshots):
 
 | Pattern | GitHub search | Results |
 | --- | --- | ---: |
-| `array_map(fn($case) => $case->value, self::cases())` | https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code | ~330 |
-| `return array_map` + `self::cases()` + `->value` | https://github.com/search?q=language%3APHP+%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code | ~1,900 |
-| `return array_map` + `fn($case) => $case->value` | https://github.com/search?q=language%3APHP+%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code | ~324 |
-| `function values()` + `return array_map` + `self::cases()` | https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code | ~784 |
-| `function toArray()` + `array_map` + `self::cases()` + `->value` | https://github.com/search?q=language%3APHP+%22function+toArray%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code | ~236 |
-| `function getValues()` + `array_map` + `self::cases()` | https://github.com/search?q=language%3APHP+%22function+getValues%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22&type=code | ~196 |
-| `function values()` + `foreach` + `self::cases()` + `[] = $` + `->value` | https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22foreach%22+%22self%3A%3Acases%28%29%22+%22%5B%5D+%3D+%24%22+%22-%3Evalue%22&type=code | ~90 |
+| `array_map(fn($case) => $case->value, self::cases())` | [click](https://github.com/search?q=language%3APHP+%22array_map%28fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code) | ~330 |
+| `return array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~1,900 |
+| `return array_map` + `fn($case) => $case->value` | [click](https://github.com/search?q=language%3APHP+%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code) | ~324 |
+| `function values()` + `return array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~784 |
+| `function toArray()` + `array_map` + `self::cases()` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+toArray%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code) | ~236 |
+| `function getValues()` + `array_map` + `self::cases()` | [click](https://github.com/search?q=language%3APHP+%22function+getValues%28%29%22+%22array_map%22+%22self%3A%3Acases%28%29%22&type=code) | ~196 |
+| `function values()` + `foreach` + `self::cases()` + `[] = $` + `->value` | [click](https://github.com/search?q=language%3APHP+%22function+values%28%29%22+%22foreach%22+%22self%3A%3Acases%28%29%22+%22%5B%5D+%3D+%24%22+%22-%3Evalue%22&type=code) | ~90 |
 | Total | — | ~3,860 |
 
 Trait pattern multiplier:
