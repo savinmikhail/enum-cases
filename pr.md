@@ -25,22 +25,24 @@ enum Status: string {
 This pattern appears widely across GitHub and frameworks, often implemented directly or via traits (which hides usage from code search). A conservative summary of real-world evidence:
 
 Quantitative (code search snapshots):
-- Exact: `array_map(fn($case) => $case->value, self::cases())` → ~330 results
-- Pattern: `return array_map` + `self::cases()` + `->value` → ~1,900 results
-- `function values()` + `array_map` + `self::cases()` → ~784 results
-- Additional aliases: `toArray()`, `getValues()` variants → hundreds more
+- [Exact](https://github.com/search?q=%22array_map(fn%28%24case%29+%3D%3E+%24case-%3Evalue%2C+self%3A%3Acases%28%29%29%22&type=code): `array_map(fn($case) => $case->value, self::cases())` → ~330 results
+- Pattern: return array_map + self::cases() + ->value → ~1,900 results
+    - https://github.com/search?q=%22return+array_map%22+%22self%3A%3Acases%28%29%22+%22-%3Evalue%22&type=code
+- Pattern: return array_map + fn($case) => $case->value → ~324 results
+    - https://github.com/search?q=%22return+array_map%22+%22fn%28%24case%29+%3D%3E+%24case-%3Evalue%22&type=code
+- Method name: function values() + return array_map + self::cases() → ~784 results
+    - https://github.com/search?q=%22function+values%28%29%22+%22return+array_map%22+%22self%3A%3Acases%28%29%22&type=code
 
 Trait pattern multiplier:
 - Many projects factor this into a trait (e.g., `EnumValuesTrait`) and then `use` it in dozens of enums, so direct search counts significantly understate usage.
 - The PHP manual itself demonstrates this trait approach; ecosystems like Laravel frequently adopt it.
 
 Frameworks and packages:
-- Symfony example (TypeIdentifier enum) uses the pattern in core.
-- Popular packages (e.g., box-project/box, vanilophp/framework) implement the pattern.
-- Widespread use in validation, migrations, and OpenAPI generators.
+- symfony/symfony (TypeIdentifier enum) example: https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43
+- box-project/box usage: https://github.com/box-project/box/blob/b3c3ccecf04c27084919bae44356182645372e25/src/Phar/DiffMode.php#L31
 
 Legacy migration pressure:
-- Libraries such as `myclabs/php-enum` provided `values()` and `toArray()`; many codebases migrating to native enums expect a native equivalent.
+- Legacy library with values(): https://github.com/myclabs/php-enum/blob/191882a09b5abb316a1166255b1c6392e2f91e14/src/Enum.php#L173
 
 Providing a native `values()` method:
 - Removes boilerplate and fragmentation (different traits/implementations).
@@ -133,7 +135,6 @@ array_map(fn($case) => $case->value, self::cases())
 ## Prior Art / References
 
 - PHP RFC: Enumerations (8.1): https://wiki.php.net/rfc/enumerations
-- Example PR style reference: https://github.com/php/php-src/pull/13029
 
 ## Checklist
 
@@ -142,11 +143,5 @@ array_map(fn($case) => $case->value, self::cases())
 - [x] Tests added (enum + reflection)
 - [x] NEWS and UPGRADING updated
 - [ ] Manual docs (php/doc-en) PR to be submitted after review
-
-## Request for Review
-
-- API shape: name, availability (backed enums only), return type semantics.
-- Behavior details: order preservation, no exposure on unit enums, ignoring regular constants.
-- Implementation placement and registration consistency with `cases()/from()/tryFrom()`.
 
 Thank you for reviewing!
