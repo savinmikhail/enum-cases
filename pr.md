@@ -40,9 +40,9 @@ This pattern appears widely across GitHub and frameworks, often implemented dire
 - PHP manual example (trait approach): https://www.php.net/manual/en/language.enumerations.examples.php#128866
 
 **Qualitative (frameworks & libraries)**:
-- symfony/symfony (TypeIdentifier enum) example: https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43
-- box-project/box usage: https://github.com/box-project/box/blob/b3c3ccecf04c27084919bae44356182645372e25/src/Phar/DiffMode.php#L31
-- Legacy library with values(): https://github.com/myclabs/php-enum/blob/191882a09b5abb316a1166255b1c6392e2f91e14/src/Enum.php#L173
+- symfony/symfony [usage](https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43)
+- box-project/box [usage](https://github.com/box-project/box/blob/b3c3ccecf04c27084919bae44356182645372e25/src/Phar/DiffMode.php#L31)
+- Legacy library with [values()](https://github.com/myclabs/php-enum/blob/191882a09b5abb316a1166255b1c6392e2f91e14/src/Enum.php#L173)
 
 Providing a native `values()` method:
 - Removes boilerplate and fragmentation (different traits/implementations).
