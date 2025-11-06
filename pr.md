@@ -122,6 +122,8 @@ Based on ecosystem scans and common patterns in public code:
 - ~20,000–40,000 additional usages via traits (e.g., `EnumValuesTrait`) are likely to fail.
 - Affects userland frameworks and applications (e.g., Symfony, Laravel) and custom projects that converged on the same implementation.
 
+Thanks, @vudaltsov for highlighting the risks to me.
+
 ### Error Behavior
 
 Declaring a `values()` method on a backed enum after this change results in a compile-time fatal error due to method redeclaration:
