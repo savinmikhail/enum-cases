@@ -37,7 +37,7 @@ This pattern appears widely across GitHub and frameworks, often implemented dire
 
 **Trait pattern multiplier**:
 - Many projects factor this into a trait (e.g., `EnumValuesTrait`) and then `use` it in dozens of enums, so direct search counts significantly understate usage.
-- PHP manual example (trait approach): https://www.php.net/manual/en/language.enumerations.examples.php#128866
+- PHP manual example shows [trait](https://www.php.net/manual/en/language.enumerations.examples.php#128866) approach
 
 **Qualitative (frameworks & libraries)**:
 - symfony/symfony [usage](https://github.com/symfony/symfony/blob/f656af9231091847f3ee45eadd6569451df79f4d/src/Symfony/Component/TypeInfo/TypeIdentifier.php#L43)
