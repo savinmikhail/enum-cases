@@ -210,9 +210,20 @@ array_map(fn($case) => $case->value, self::cases())
 - Traits / helpers in userland: remains fragmented and non-discoverable.
 - Different naming (`toArray()`, `getValues()`): ambiguous or verbose; `values()` best matches existing community conventions and parallels `cases()`.
 
-## Prior Art / References
+## Prior Art
 
-- PHP RFC: Enumerations (8.1): https://wiki.php.net/rfc/enumerations
+No previous RFCs proposing a `BackedEnum::values()` method were found.
+A review of the [PHP RFC index](https://wiki.php.net/rfc) shows several enum-related proposals:
+
+- [Add get_declared_enums() function (2024)](https://wiki.php.net/rfc/get_declared_enums)
+- [Fetch properties of enums in const expressions (2022)](https://wiki.php.net/rfc/fetch_property_in_const_expressions)
+- [Enumerations (2020)](https://wiki.php.net/rfc/enumerations)
+- [Allow static properties in enums (2021)](https://wiki.php.net/rfc/enum_allow_static_properties)
+- [Auto-implement Stringable for string backed enums (2022)](https://wiki.php.net/rfc/enum_allow_static_properties)
+- [Sorting enum (2021)](https://wiki.php.net/rfc/sorting_enum)
+
+However, none of them address adding a convenience method returning the list of backing values.
+This proposal introduces it for the first time.
 
 ## Checklist
 
