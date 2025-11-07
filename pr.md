@@ -113,86 +113,28 @@ Manual (php/doc-en) to be added in a separate PR:
 
 ## Backward Compatibility
 
-This is a BREAKING CHANGE for code that already declares a `values()` method on a backed enum (directly or via a trait).
+No BC break.
 
-### Impact Assessment
+- The engine registers the native `BackedEnum::values()` only if the enum does not already declare a userland static `values()` method.
+- If an enum (or a trait it uses) defines `values()`, that method is preserved and continues to work unchanged.
+- Reflection continues to show a `values()` method; either the native one or the user-defined one.
+- Unit enums remain unaffected; they do not expose `values()`.
 
-Based on ecosystem scans and common patterns in public code:
-- 3,860+ direct implementations of `values()` on backed enums will fail to compile.
-- ~20,000–40,000 additional usages via traits (e.g., `EnumValuesTrait`) are likely to fail.
-- Affects userland frameworks and applications (e.g., Symfony, Laravel) and custom projects that converged on the same implementation.
+Compatibility notes:
+- Projects may optionally remove duplicate userland implementations and rely on the native method, but no migration is required.
+- Behavior of existing custom `values()` implementations is preserved; the engine does not override or redeclare them.
 
-Thanks, @vudaltsov for highlighting the risks to me.
+Thanks, @vudaltsov, for highlighting the risks—resolved by conditional registration.
 
-### Error Behavior
+## Optional Cleanup
 
-Declaring a `values()` method on a backed enum after this change results in a compile-time fatal error due to method redeclaration:
-
-```php
-enum Status: string {
-    case Active = 'active';
-
-    public static function values(): array { /* userland */ }
-    // Fatal error: Cannot redeclare BackedEnum::values()
-}
-```
-
-Notes:
-- This method exists only on backed enums; unit enums do not expose `values()`.
-- This is not an override; it is a redeclaration of an engine-registered method.
-
-### Migration Required
-
-All affected code must:
-1. Remove custom `values()` implementations from backed enums.
-2. Remove or stop using traits that provide `values()`.
-3. Re-run tests to ensure behavior remains consistent with the native implementation.
-
-Rationale for accepting the break:
-- Implementations across the ecosystem are effectively identical; migration is mechanical (delete method/trait usage).
-- Behavior remains the same post-migration; the native method returns the same data in the same order.
-- Prior precedent: the 8.1 enum introduction required migrations from popular libraries (e.g., myclabs/php-enum).
-
-## Migration Guide
-
-### 1) Find affected code
-
-```bash
-# Enums that declare values()
-grep -R --line-number --include='*.php' "public static function values()" .
-
-# Traits that likely provide values()
-grep -R --line-number --include='*.php' -E "trait .*EnumValues|values\(\)" .
-```
-
-### 2) Remove userland implementations
-
-```php
-// Before
-enum Status: string {
-    case Active = 'active';
-    public static function values(): array {
-        return array_map(fn($c) => $c->value, self::cases());
-    }
-}
-
-// After (delete the method)
-enum Status: string {
-    case Active = 'active';
-}
-```
-
-### 3) Verify behavior
-
-```php
-var_dump(Status::values()); // Works via native BackedEnum::values()
-```
+Projects that wish to standardize on the native API can remove their custom `values()` implementations and rely on `BackedEnum::values()`; behavior will remain the same.
 
 ## Mitigations Considered
 
-- Phased rollout (deprecate in 8.6, fatal in 9.0): would require engine-level checks to emit `E_DEPRECATED` when userland defines `values()`; technically feasible but adds complexity and delays consistency.
-- Different method name (e.g., `getValues()`, `valueList()`): avoids breakage but diverges from established conventions and symmetry with `cases()`; likely to fragment usage.
-- Accept BC break (this proposal): migration is trivial and mechanical; standardizes a ubiquitous pattern with long-term ecosystem benefits. I can prepare a rector rule for it
+- Conditional registration (chosen): skip registering the native method if userland already defines `values()`; preserves BC while providing a standard API where missing.
+- Different method name (e.g., `getValues()`, `valueList()`): avoids collision but diverges from established conventions and symmetry with `cases()`.
+- Phased rollout (deprecation first): unnecessary given the conditional approach above.
 
 ## Performance
 
