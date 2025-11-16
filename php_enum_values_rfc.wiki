@@ -1,11 +1,11 @@
 ====== PHP RFC: Add values() Method to BackedEnum ======
-* Version: 1.0
-* Date: 2025-11-09
-* Author: Savin Mikhail, mikhail.d.savin@gmail.com
-* Status: Under Discussion
-* Target Version: PHP 8.6
-* Implementation: https://github.com/php/php-src/pull/20398
-* Discussion: https://externals.io/message/129186
+  * Version: 1.0
+  * Date: 2025-11-09
+  * Author: Savin Mikhail, mikhail.d.savin@gmail.com
+  * Status: Under Discussion
+  * Target Version: PHP 8.6
+  * Implementation: https://github.com/php/php-src/pull/20398
+  * Discussion: https://externals.io/message/129186
 
 ===== Introduction =====
 
@@ -15,9 +15,9 @@ This RFC proposes adding a native ''values()'' method to the ''BackedEnum'' inte
 <?php
 
 enum Status: string {
-case Active = 'active';
-case Inactive = 'inactive';
-case Archived = 'archived';
+    case Active = 'active';
+    case Inactive = 'inactive';
+    case Archived = 'archived';
 }
 
 // Automatically available - no manual implementation needed:
@@ -28,9 +28,9 @@ var_dump(Status::values());
 </PHP>
 
 **Common use cases:**
-* Database schema definitions: ''$table->enum('status', Status::values())''
-* Form validation: ''$validator->rule('status', 'in', Status::values())''
-* API responses: ''['allowed_statuses' => Status::values()]''
+  * Database schema definitions: ''$table->enum('status', Status::values())''
+  * Form validation: ''$validator->rule('status', 'in', Status::values())''
+  * API responses: ''['allowed_statuses' => Status::values()]''
 
 ===== Proposal =====
 
@@ -41,15 +41,15 @@ Add a native ''values()'' static method to the ''BackedEnum'' interface that is 
 
 interface BackedEnum extends UnitEnum
 {
-/**
-* Returns an indexed array of all backing values for the enum cases.
-*
-* This method is automatically available unless the enum defines its own
-* values() method, in which case the user-defined implementation is used.
-*
-* @return int[]|string[]
-*/
-public static function values(): array;
+    /**
+     * Returns an indexed array of all backing values for the enum cases.
+     * 
+     * This method is automatically available unless the enum defines its own
+     * values() method, in which case the user-defined implementation is used.
+     *
+     * @return int[]|string[]
+     */
+    public static function values(): array;
 }
 
 ?>
@@ -64,17 +64,17 @@ The native implementation is only registered when the enum **does not** already 
 
 // Case 1: No user-defined values() - native implementation added automatically
 enum Status: string {
-case Active = 'active';
-case Inactive = 'inactive';
+    case Active = 'active';
+    case Inactive = 'inactive';
 }
 
 Status::values(); // Native implementation: ['active', 'inactive']
 
 // Case 2: User-defined values() - native implementation NOT added, user's version is used
 enum Priority: int {
-case Low = 1;
-case High = 10;
-
+    case Low = 1;
+    case High = 10;
+    
     public static function values(): array {
         // Custom implementation - maybe sorted
         $values = array_map(fn($c) => $c->value, self::cases());
@@ -89,18 +89,18 @@ Priority::values(); // User's implementation: [1, 10] (sorted)
 </PHP>
 
 This approach ensures:
-* **Zero BC breaks** - existing code with ''values()'' continues working unchanged
-* **Immediate benefit** - new enums automatically get ''values()''
-* **Library compatibility** - libraries can maintain their implementation for older PHP versions
+  * **Zero BC breaks** - existing code with ''values()'' continues working unchanged
+  * **Immediate benefit** - new enums automatically get ''values()''
+  * **Library compatibility** - libraries can maintain their implementation for older PHP versions
 
 ==== Behavior ====
 
 When the native implementation is used:
-* **Returns:** An indexed array (keys: 0, 1, 2, ...) containing the backing values of all enum cases
-* **Order:** Declaration order (same as ''cases()'')
-* **Type:** ''array<int>'' for int-backed enums, ''array<string>'' for string-backed enums
-* **Empty enums:** Returns ''[]''
-* **Availability:** Only on ''BackedEnum'', not on ''UnitEnum'' (pure enums)
+  * **Returns:** An indexed array (keys: 0, 1, 2, ...) containing the backing values of all enum cases
+  * **Order:** Declaration order (same as ''cases()'')
+  * **Type:** ''array<int>'' for int-backed enums, ''array<string>'' for string-backed enums
+  * **Empty enums:** Returns ''[]''
+  * **Availability:** Only on ''BackedEnum'', not on ''UnitEnum'' (pure enums)
 
 ==== Examples ====
 
@@ -272,10 +272,10 @@ var_dump(EmptyEnum::values());
 **This RFC introduces ZERO backward compatibility breaks.**
 
 The conditional registration approach ensures that:
-* **Existing enums** with custom ''values()'' methods continue working unchanged
-* **Trait-based** implementations are respected
-* **Libraries** can maintain their implementations for older PHP version support
-* **No migration** is required for any existing code
+  * **Existing enums** with custom ''values()'' methods continue working unchanged
+  * **Trait-based** implementations are respected
+  * **Libraries** can maintain their implementations for older PHP version support
+  * **No migration** is required for any existing code
 
 ==== How It Works ====
 
@@ -293,17 +293,17 @@ register_native_values(enum_class);
 </code>
 
 This means:
-* **PHP 8.4/8.5 code** with custom ''values()'' works identically in **PHP 8.6**
-* **New enums** automatically get ''values()'' without any code
-* **Gradual migration** is possible - libraries can remove their implementation when they drop PHP 8.5 support
+  * **PHP 8.4/8.5 code** with custom ''values()'' works identically in **PHP 8.6**
+  * **New enums** automatically get ''values()'' without any code
+  * **Gradual migration** is possible - libraries can remove their implementation when they drop PHP 8.5 support
 
 ==== Impact on Ecosystem ====
 
 **Positive impacts:**
-* ~3,860+ enums with custom ''values()'' - **continue working** (no changes needed)
-* ~20,000-40,000 enums via traits - **continue working** (no changes needed)
-* New enums - **automatically get** ''values()'' without boilerplate
-* **Zero migration effort** for existing code
+  * ~3,860+ enums with custom ''values()'' - **continue working** (no changes needed)
+  * ~20,000-40,000 enums via traits - **continue working** (no changes needed)
+  * New enums - **automatically get** ''values()'' without boilerplate
+  * **Zero migration effort** for existing code
 
 **Optional cleanup opportunity:**
 Over time, projects can optionally remove redundant ''values()'' implementations when they drop support for PHP < 8.6:
@@ -313,8 +313,8 @@ Over time, projects can optionally remove redundant ''values()'' implementations
 
 // PHP 8.4/8.5: Need custom implementation
 enum Status: string {
-case Active = 'active';
-
+    case Active = 'active';
+    
     public static function values(): array {
         return array_map(fn($c) => $c->value, self::cases());
     }
@@ -322,8 +322,8 @@ case Active = 'active';
 
 // PHP 8.6+: Can remove (but not required)
 enum Status: string {
-case Active = 'active';
-// Native values() available automatically
+    case Active = 'active';
+    // Native values() available automatically
 }
 
 ?>
@@ -341,16 +341,16 @@ This approach makes ''values()'' **the only enum method that can be user-defined
 | ''values()'' | ✅ Yes (conditional) |
 
 **Rationale for this trade-off:**
-* Avoids **all** backward compatibility breaks
-* Provides **immediate benefit** without ecosystem disruption
-* Allows **gradual adoption** - libraries can migrate at their own pace
-* **Practical** over theoretical consistency - solves real problem (24k-44k instances of boilerplate) without forcing changes
+  * Avoids **all** backward compatibility breaks
+  * Provides **immediate benefit** without ecosystem disruption
+  * Allows **gradual adoption** - libraries can migrate at their own pace
+  * **Practical** over theoretical consistency - solves real problem (24k-44k instances of boilerplate) without forcing changes
 
 **Future path to full consistency:**
 If desired, a future RFC could:
-1. Emit ''E_DEPRECATED'' for user-defined ''values()'' in PHP 8.x
-2. Make it non-overridable in PHP 9.0
-3. Achieve full consistency with other enum methods
+  1. Emit ''E_DEPRECATED'' for user-defined ''values()'' in PHP 8.x
+  2. Make it non-overridable in PHP 9.0
+  3. Achieve full consistency with other enum methods
 
 This RFC deliberately prioritizes **pragmatic value delivery** over **perfect API consistency**.
 
@@ -365,16 +365,16 @@ This is a feature addition with zero BC breaks, appropriate for a minor version.
 ==== To the Ecosystem ====
 
 **Positive impacts:**
-* **IDEs/LSPs:** Native method appears in autocomplete for enums without custom ''values()''
-* **Static Analyzers:** Can infer ''values()'' availability more reliably
-* **Frameworks:** No changes needed, but can gradually simplify helpers/traits
-* **Documentation:** Single standard approach simplifies teaching
-* **Libraries:** No forced migrations, can maintain compatibility across PHP versions
+  * **IDEs/LSPs:** Native method appears in autocomplete for enums without custom ''values()''
+  * **Static Analyzers:** Can infer ''values()'' availability more reliably
+  * **Frameworks:** No changes needed, but can gradually simplify helpers/traits
+  * **Documentation:** Single standard approach simplifies teaching
+  * **Libraries:** No forced migrations, can maintain compatibility across PHP versions
 
 **No negative impacts:**
-* Zero breaking changes
-* All existing code continues working
-* Optional cleanup can happen gradually
+  * Zero breaking changes
+  * All existing code continues working
+  * Optional cleanup can happen gradually
 
 ==== To Existing Extensions ====
 
@@ -429,8 +429,8 @@ This RFC deliberately keeps the API simple with indexed arrays matching ''cases(
 ==== Additional Helper Methods ====
 
 Future RFCs could add related methods:
-* ''names()'': Return array of case names
-* ''toArray()'': Return associative array of name => value pairs
+  * ''names()'': Return array of case names
+  * ''toArray()'': Return associative array of name => value pairs
 
 These are intentionally excluded from this RFC to keep scope focused.
 
@@ -450,15 +450,15 @@ Vote will open 2 weeks after RFC announcement and remain open for 2 weeks.
 **Pull Request:** https://github.com/php/php-src/pull/20398
 
 **Implementation includes:**
-* Core implementation in ''Zend/zend_enum.c'' with conditional registration logic
-* Stub files updated (''zend_enum.stub.php'')
-* Comprehensive test coverage (9+ test files) including:
+  * Core implementation in ''Zend/zend_enum.c'' with conditional registration logic
+  * Stub files updated (''zend_enum.stub.php'')
+  * Comprehensive test coverage (9+ test files) including:
     * Native implementation (when user doesn't define ''values()'')
     * User-defined implementation (when user defines ''values()'')
     * Trait-based implementation
     * Reflection behavior for both cases
     * Edge cases (empty enums, order preservation, etc.)
-* Documentation in NEWS and UPGRADING
+  * Documentation in NEWS and UPGRADING
 
 **Key implementation detail:**
 
@@ -471,8 +471,8 @@ zend_function *existing = zend_hash_str_find_ptr(
 );
 
 if (existing && existing->common.scope == ce) {
-// User defined values() on this enum - respect it
-return;
+    // User defined values() on this enum - respect it
+    return;
 }
 
 // No user-defined values() - register native implementation
@@ -485,32 +485,32 @@ All tests pass. Implementation is ready for merge pending RFC approval.
 ===== Implementation =====
 
 After the RFC is approved, this section will contain:
-* Version merged into: PHP 8.6.0
-* Git commit: (link will be added)
-* PHP manual entry: (link will be added)
+  * Version merged into: PHP 8.6.0
+  * Git commit: (link will be added)
+  * PHP manual entry: (link will be added)
 
 ===== References =====
 
 **Research and Evidence:**
-* GitHub code search: ~3,860 direct implementations found
-* Estimated real usage: ~20,000-40,000 (accounting for trait pattern)
-* Symfony core usage: ''symfony/symfony/src/Symfony/Component/TypeInfo/TypeIdentifier.php''
-* PHP.net manual: Documents ''EnumValuesTrait'' pattern
-* Internals discussion: (link will be added after initial email)
+  * GitHub code search: ~3,860 direct implementations found
+  * Estimated real usage: ~20,000-40,000 (accounting for trait pattern)
+  * Symfony core usage: ''symfony/symfony/src/Symfony/Component/TypeInfo/TypeIdentifier.php''
+  * PHP.net manual: Documents ''EnumValuesTrait'' pattern
+  * Internals discussion: (link will be added after initial email)
 
 **Search queries performed:**
-* https://github.com/search?q=language:PHP+"array_map(fn($case)+=>+$case->value,+self::cases())"
-* https://github.com/search?q=language:PHP+"return+array_map"+"self::cases()"+"->value"
-* https://github.com/search?q=language:PHP+"function+values()"+"return+array_map"+"self::cases()"
+  * https://github.com/search?q=language:PHP+"array_map(fn($case)+=>+$case->value,+self::cases())"
+  * https://github.com/search?q=language:PHP+"return+array_map"+"self::cases()"+"->value"
+  * https://github.com/search?q=language:PHP+"function+values()"+"return+array_map"+"self::cases()"
 
 **Prior Art:**
-* **TypeScript:** ''Object.values(EnumType)''
-* **Python:** ''[e.value for e in EnumType]''
-* **myclabs/php-enum** (legacy): Had ''values()'' method (4,900 stars)
+  * **TypeScript:** ''Object.values(EnumType)''
+  * **Python:** ''[e.value for e in EnumType]''
+  * **myclabs/php-enum** (legacy): Had ''values()'' method (4,900 stars)
 
 **Related RFCs:**
-* PHP 8.1 Enumerations: https://wiki.php.net/rfc/enumerations
-* No previous RFC for ''values()'' method
+  * PHP 8.1 Enumerations: https://wiki.php.net/rfc/enumerations
+  * No previous RFC for ''values()'' method
 
 ===== Rejected Features =====
 
@@ -519,10 +519,10 @@ After the RFC is approved, this section will contain:
 Initially considered making ''values()'' always native and non-overridable (like ''cases()''/''from()''/''tryFrom()'').
 
 **Rejected because:**
-* Would break ~24,000-44,000 existing enum instances
-* Disproportionate impact for the benefit provided
-* Libraries particularly affected (cannot easily drop old PHP version support)
-* Internals feedback indicated BC break too large
+  * Would break ~24,000-44,000 existing enum instances
+  * Disproportionate impact for the benefit provided
+  * Libraries particularly affected (cannot easily drop old PHP version support)
+  * Internals feedback indicated BC break too large
 
 **Conditional approach chosen instead:** Provides benefit without breaking changes.
 
@@ -534,48 +534,48 @@ Initially considered making ''values()'' always native and non-overridable (like
 **''extractValues()''**: Too long, unclear
 
 **Decision:** ''values()'' best matches:
-* Existing community usage (3,860+ examples use this name)
-* Parallel naming with ''cases()''
-* Simplicity and clarity
+  * Existing community usage (3,860+ examples use this name)
+  * Parallel naming with ''cases()''
+  * Simplicity and clarity
 
 ==== Virtual/Magic Properties ====
 
 Suggestion to use ''Status::$values'' instead of ''Status::values()''.
 
 **Rejected because:**
-* Enums cannot have static properties (language restriction)
-* No mechanism for static virtual properties exists
-* Inconsistent with ''cases()'', ''from()'', ''tryFrom()'' (all methods)
-* Would require complex engine changes
+  * Enums cannot have static properties (language restriction)
+  * No mechanism for static virtual properties exists
+  * Inconsistent with ''cases()'', ''from()'', ''tryFrom()'' (all methods)
+  * Would require complex engine changes
 
 ==== User-land Trait in Standard Library ====
 
 Suggestion to provide standard library trait instead of native method.
 
 **Rejected because:**
-* Requires ''use'' statement in every enum (boilerplate persists)
-* Not automatically available (discoverability issue)
-* Fragmentation - multiple competing trait implementations exist
-* Conditional native approach provides better UX
+  * Requires ''use'' statement in every enum (boilerplate persists)
+  * Not automatically available (discoverability issue)
+  * Fragmentation - multiple competing trait implementations exist
+  * Conditional native approach provides better UX
 
 ==== array_column() Alternative ====
 
 Suggestion that ''array_column(Status::cases(), 'value')'' is sufficient.
 
 **Rejected because:**
-* Not discoverable for newcomers
-* Less readable than dedicated method
-* Doesn't solve standardization problem
-* Evidence shows community strongly prefers explicit method (3,860+ implementations)
+  * Not discoverable for newcomers
+  * Less readable than dedicated method
+  * Doesn't solve standardization problem
+  * Evidence shows community strongly prefers explicit method (3,860+ implementations)
 
 ==== Different Signature ====
 
 Considered allowing customization: ''values(sorted: true)'' or ''values(unique: true)''.
 
 **Rejected because:**
-* Adds complexity for rare use cases
-* Users can easily pipe through ''array_unique()'' or ''sort()'' if needed
-* Keeps API consistent with simple ''cases()''
+  * Adds complexity for rare use cases
+  * Users can easily pipe through ''array_unique()'' or ''sort()'' if needed
+  * Keeps API consistent with simple ''cases()''
 
 <PHP>
 <?php
@@ -592,12 +592,12 @@ $unique = array_unique(Status::values());
 Considered emitting ''E_DEPRECATED'' for user-defined ''values()'' immediately.
 
 **Rejected because:**
-* Unnecessary - the conditional approach works well
-* Would create noise without benefit
-* Can be revisited in future if full API consistency is desired
+  * Unnecessary - the conditional approach works well
+  * Would create noise without benefit
+  * Can be revisited in future if full API consistency is desired
 
 ===== Changelog =====
 
-* **2025-11-09:** Initial RFC published with conditional implementation approach
-* **2025-11-09:** Announced on internals@lists.php.net
-* (Future updates will be listed here)
+  * **2025-11-09:** Initial RFC published with conditional implementation approach
+  * **2025-11-09:** Announced on internals@lists.php.net
+  * (Future updates will be listed here)
