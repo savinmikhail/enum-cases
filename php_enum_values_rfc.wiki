@@ -1,6 +1,6 @@
 ====== PHP RFC: Add values() Method to BackedEnum ======
-  * Version: 1.0
-  * Date: 2025-11-09
+  * Version: 1.1
+  * Date: 2025-11-09 (Updated: 2025-11-16)
   * Author: Savin Mikhail, mikhail.d.savin@gmail.com
   * Status: Under Discussion
   * Target Version: PHP 8.6
@@ -9,7 +9,7 @@
 
 ===== Introduction =====
 
-This RFC proposes adding a native ''values()'' method to the ''BackedEnum'' interface that returns an indexed array of all backing values. The native implementation is added **conditionally** - only when the enum doesn't already define its own ''values()'' method, ensuring **zero backward compatibility breaks**.
+This RFC proposes adding a native ''values()'' method to the ''BackedEnum'' interface that returns an indexed array of all backing values. The method is declared in the interface **without a return type** and the native implementation is added **conditionally** - only when the enum doesn't already define its own ''values()'' method, ensuring **zero backward compatibility breaks**.
 
 <PHP>
 <?php
@@ -34,7 +34,7 @@ var_dump(Status::values());
 
 ===== Proposal =====
 
-Add a native ''values()'' static method to the ''BackedEnum'' interface that is conditionally registered based on whether the user has already defined it:
+Add a native ''values()'' static method to the ''BackedEnum'' interface that is conditionally registered based on whether the user has already defined it. The interface declares the method **without a return type** to maintain maximum backward compatibility:
 
 <PHP>
 <?php
@@ -43,17 +43,22 @@ interface BackedEnum extends UnitEnum
 {
     /**
      * Returns an indexed array of all backing values for the enum cases.
-     * 
+     *
      * This method is automatically available unless the enum defines its own
      * values() method, in which case the user-defined implementation is used.
      *
      * @return int[]|string[]
      */
-    public static function values(): array;
+    public static function values();
 }
 
 ?>
 </PHP>
+
+**Key decisions:**
+  * **No return type in interface:** Allows user implementations to declare any return type (or none), ensuring all existing implementations remain compatible
+  * **Native implementation returns array:** The native implementation always returns a proper array regardless of interface declaration
+  * **PHPDoc preserved:** Type information is maintained in docblock for static analysis and IDE support
 
 ==== Conditional Registration ====
 
@@ -74,7 +79,8 @@ Status::values(); // Native implementation: ['active', 'inactive']
 enum Priority: int {
     case Low = 1;
     case High = 10;
-    
+
+    // Can use any return type since interface has no return type
     public static function values(): array {
         // Custom implementation - maybe sorted
         $values = array_map(fn($c) => $c->value, self::cases());
@@ -84,6 +90,18 @@ enum Priority: int {
 }
 
 Priority::values(); // User's implementation: [1, 10] (sorted)
+
+// Case 3: Different return type - also allowed (though semantically unusual)
+enum Status: string {
+    case Active = 'active';
+
+    // No error - interface allows any return type
+    public static function values(): string {
+        return implode(',', array_map(fn($c) => $c->value, self::cases()));
+    }
+}
+
+Status::values(); // "active,inactive,..."
 
 ?>
 </PHP>
@@ -193,8 +211,9 @@ enum Color: string {
     case Red = 'red';
     case Green = 'green';
     case Blue = 'blue';
-    
+
     // Custom implementation - returns uppercase values
+    // Can use : array or any other return type (interface has no type requirement)
     public static function values(): array {
         return array_map(
             fn($c) => strtoupper($c->value),
@@ -217,7 +236,7 @@ var_dump(Color::values());
 enum LibraryEnum: string {
     case Option1 = 'opt1';
     case Option2 = 'opt2';
-    
+
     // Defined for PHP 8.4/8.5 compatibility
     // In PHP 8.6+, this is used instead of native (no conflict)
     public static function values(): array {
@@ -244,7 +263,7 @@ trait EnumValues {
 
 enum Status: string {
     use EnumValues; // User's trait takes precedence
-    
+
     case Draft = 'draft';
     case Published = 'published';
 }
@@ -271,11 +290,20 @@ var_dump(EmptyEnum::values());
 
 **This RFC introduces ZERO backward compatibility breaks.**
 
-The conditional registration approach ensures that:
-  * **Existing enums** with custom ''values()'' methods continue working unchanged
-  * **Trait-based** implementations are respected
-  * **Libraries** can maintain their implementations for older PHP version support
-  * **No migration** is required for any existing code
+Two complementary design decisions ensure complete backward compatibility:
+
+**1. No return type in interface:**
+  * Allows user implementations to declare any return type (or none)
+  * All 6,800+ existing ''values()'' implementations remain syntactically compatible
+  * No compile errors regardless of what return type users declared
+
+**2. Conditional registration:**
+  * Native implementation is only added when enum doesn't define ''values()''
+  * Existing enums with custom ''values()'' methods continue working unchanged
+  * Trait-based implementations are respected
+  * Libraries can maintain their implementations for older PHP version support
+
+**Result: No migration required for any existing code.**
 
 ==== How It Works ====
 
@@ -314,7 +342,7 @@ Over time, projects can optionally remove redundant ''values()'' implementations
 // PHP 8.4/8.5: Need custom implementation
 enum Status: string {
     case Active = 'active';
-    
+
     public static function values(): array {
         return array_map(fn($c) => $c->value, self::cases());
     }
@@ -399,7 +427,7 @@ If the community later prefers full consistency (non-overridable ''values()'' li
 <?php
 enum Status: string {
     case Active = 'active';
-    
+
     public static function values(): array { ... }
     // Deprecated: Status::values() is provided natively and should not be redeclared
 }
@@ -514,6 +542,61 @@ After the RFC is approved, this section will contain:
 
 ===== Rejected Features =====
 
+==== Interface WITH Return Type ('': array'') ====
+
+An alternative implementation was considered where the interface would explicitly declare an '': array'' return type:
+
+<PHP>
+<?php
+
+interface BackedEnum extends UnitEnum
+{
+    public static function values(): array;  // ← WITH return type
+}
+
+?>
+</PHP>
+
+**Advantages:**
+  * Full type safety in the interface contract
+  * Better IDE inference and autocomplete
+  * Consistent with modern PHP practices
+  * Matches ''cases(): array'' signature
+
+**Why rejected:**
+
+Comprehensive GitHub search analysis found **6,800 existing ''values()'' implementations**:
+
+^ Category ^ Count ^ % ^
+| Compatible: '': array'' return type | 6,200 | 91.2% |
+| Missing return type | 64 | 0.9% ❌ |
+| Incompatible: other types ('': string'', '': Iterator'', etc.) | 7 | 0.1% ❌ |
+| Unaccounted | ~529 | ~7.8% ❓ |
+| **Total potential BC breaks** | **71-600** | **1.0-8.8%** |
+
+**Example breaking code:**
+<PHP>
+<?php
+
+enum Status: string {
+    case Active = 'active';
+
+    public static function values() {  // ❌ Missing : array
+        return array_column(self::cases(), 'value');
+    }
+}
+// Fatal error: Declaration of Status::values() must be compatible
+// with BackedEnum::values(): array
+
+?>
+</PHP>
+
+While 91.2% of implementations already have the correct signature, breaking even 1-9% of the ecosystem (71-600 codebases) was deemed unacceptable for a convenience feature.
+
+**Solution chosen:** Omit return type from interface. This allows all existing implementations to remain compatible while the native implementation still returns a proper array.
+
+**Future consideration:** Stricter typing with '': array'' could be reconsidered for PHP 9.0 (major version where BC breaks are more acceptable), with a deprecation period in PHP 8.x.
+
 ==== Mandatory Native Implementation (Breaking Change) ====
 
 Initially considered making ''values()'' always native and non-overridable (like ''cases()''/''from()''/''tryFrom()'').
@@ -600,4 +683,5 @@ Considered emitting ''E_DEPRECATED'' for user-defined ''values()'' immediately.
 
   * **2025-11-09:** Initial RFC published with conditional implementation approach
   * **2025-11-09:** Announced on internals@lists.php.net
+  * **2025-11-16:** Updated to clarify interface has no return type (not '': array'') to ensure zero BC breaks
   * (Future updates will be listed here)
