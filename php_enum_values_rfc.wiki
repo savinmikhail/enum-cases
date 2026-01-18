@@ -166,10 +166,13 @@ High-level changes:
 
 ===== Voting =====
 
+This is a Yes/No vote, requiring a 2/3 majority.
+
+Voting started on Jan 18, 2026 and ends on Feb 10, 2026
+
 <doodle title="Add BackedEnum::values()?" voteType="single" closed="false" closeon="2026-02-10T00:00:00Z">
-  * Yes
-  * No
-  * Abstain
+   * Yes
+   * No
 </doodle>
 
 ===== References =====
@@ -309,4 +312,5 @@ The goal is not to enable something impossible in userland, but to make the comm
   * **2025-11-09:** Initial RFC published with conditional implementation approach
   * **2025-11-09:** Announced on internals@lists.php.net
   * **2025-11-16:** Updated to clarify interface has no return type (not '': array'') to ensure zero BC breaks
+  * **2026-01-18:** Prepared RFC to voting phase, emphasize motivation
   * (Future updates will be listed here)
