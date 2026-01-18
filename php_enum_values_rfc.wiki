@@ -11,7 +11,16 @@
 
 Backed enums frequently need an indexed list of their backing values (int|string). Today this is commonly implemented in userland using a helper method or a trait.
 
-This RFC proposes adding a native ''values()'' static method to the ''BackedEnum'' interface that returns an indexed array of all backing values in declaration order.
+The pattern is widespread and implemented many times across the ecosystem.
+
+GitHub code search (2025-11-12) found roughly:
+  * about 7,460 direct implementations of extracting values from ''self::cases()'';
+  * about 2,900 occurrences of traits that define ''function values()'' (often applied to many enums), which suggests the real usage is significantly higher.
+  * a conservative estimate is 20,000-40,000 total usages once trait reuse is accounted for.
+
+More info about this research you can find in PR.
+
+This RFC proposes adding a native ''values()'' static method to the ''BackedEnum'' interface that returns an indexed array of all backing values in declaration order. By doing that I hope to standardize the most common helper into a native method and reduce boilerplate across projects.
 
 To avoid fatal errors from method name collisions with existing userland implementations, the native implementation is registered only if the enum does not already define a ''values()'' method (including via traits). The interface declaration intentionally has no return type.
 
@@ -34,19 +43,6 @@ Common use cases include:
   * Database schema definitions: ''$table->enum('status', Status::values())''
   * Form validation: ''Choice(callback: [Status::class, 'values'])''
   * API responses: ''['allowed_statuses' => Status::values()]''
-
-===== Motivation =====
-
-The pattern is widespread and implemented many times across the ecosystem.
-
-GitHub code search (2025-11-12) found roughly:
-  * about 7,460 direct implementations of extracting values from ''self::cases()'';
-  * about 2,900 occurrences of traits that define ''function values()'' (often applied to many enums), which suggests the real usage is significantly higher.
-  * a conservative estimate is 20,000-40,000 total usages once trait reuse is accounted for.
-
-More info about this research you can find in PR.
-
-This RFC standardizes the most common helper into a native method, improves discoverability, and reduces boilerplate and fragmentation across projects.
 
 ===== Proposal =====
 
@@ -101,6 +97,31 @@ However, a native ''values()'' method:
 
 The large number of existing implementations suggests that the ecosystem repeatedly needs this helper.
 
+===== Proposed PHP Version(s) =====
+
+Next PHP 8.x (PHP 8.6)
+
+
+===== RFC Impact =====
+
+==== To the Ecosystem ====
+
+IDEs, Language servers, static analyzers, polyfills might need to update their stubs to reflect docblock from updated BackedEnum interface
+
+==== To Existing Extensions ====
+
+No impact.
+
+==== To SAPIs ====
+
+No impact.
+
+===== Open Issues =====
+
+The following points were raised during discussion and are explicitly called out for voters to consider:
+  * Whether conditional registration (allowing existing user-defined ''values()'' to take precedence) is an acceptable trade-off versus strict consistency with ''cases()/from()/tryFrom()''.
+  * Whether the interface should eventually gain a concrete return type (e.g. '': array'') in a future major version.
+  * Whether a future deprecation path toward a non-overridable native method is desirable (out of scope for this RFC).
 
 ===== Future Scope =====
 
@@ -145,8 +166,11 @@ High-level changes:
 
 ===== Voting =====
 
-When moving this RFC to voting, this section will be updated with the voting dates and the vote block.
-
+<doodle title="Add BackedEnum::values()?" voteType="single" closed="false" closeon="2026-02-10T00:00:00Z">
+  * Yes
+  * No
+  * Abstain
+</doodle>
 
 ===== References =====
 
