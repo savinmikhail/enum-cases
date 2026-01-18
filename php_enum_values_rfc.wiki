@@ -2,7 +2,7 @@
   * Version: 1.2
   * Date: 2025-11-09 (Updated: 2025-11-16)
   * Author: Savin Mikhail, mikhail.d.savin@gmail.com
-  * Status: Under Discussion
+  * Status: Voting
   * Target Version: PHP 8.6
   * Implementation: https://github.com/php/php-src/pull/20398
   * Discussion: https://externals.io/message/129186
